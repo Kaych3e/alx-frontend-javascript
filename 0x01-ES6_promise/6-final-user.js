@@ -6,12 +6,26 @@ export default function handleProfileSignup(
   lastName,
   fileName,
 ) {
-  const createPromise = signUpUser(firstName, lastName);
-  const uploadPromise = uploadPhoto(fileName);
+  const res = [];
+  try {
+    const user = signUpUser(firstName, lastName);
+    res.push({ status: 'fulfilled', value: user });
+  } catch (err) {
+    res.push({
+      status: 'rejected',
+      value: err.toString(),
+    });
+  }
 
-  return Promise.allSettled([createPromise,
-    uploadPromise]).then((results) => results.map((result) => ({
-    status: result.status,
-    value: result.status === 'fulfilled' ? result.value : result.error,
-  })));
+  try {
+    const upload = uploadPhoto(fileName);
+    res.push({ status: 'fulfilled', value: upload });
+  } catch (err) {
+    res.push({
+      status: 'rejected',
+      value: err.toString(),
+    });
+  }
+
+  return res;
 }
